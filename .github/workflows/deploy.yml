@@ -1,0 +1,23 @@
+name: Cluster Deployment
+    on:
+      push:
+        branches: [ n ]
+    jobs:
+      deploy:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout Code
+            uses: actions/checkout@v4
+          - name: Security Scan
+            uses: gitleaks/gitleaks-action@v2
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          - name: Deploy to Node 1
+            uses: easingthemes/ssh-deploy@main
+            env:
+              SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+              REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+              REMOTE_USER: ubuntu
+              TARGET: /var/www/cluster
+              SCRIPT_AFTER: |
+                cd /var/www/cluster && ./scripts/setup-node.sh
